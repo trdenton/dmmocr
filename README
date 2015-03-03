@@ -1,0 +1,13 @@
+This is highly experimental! As in, nowhere near stable or usable.
+
+Requirements: OpenCV and TKinter. Python. I just used whatever the ubuntu repositories had.
+
+Usage: for now you will need to modify {{{ui.py}}} to use the video capture device of your choosing.
+
+Run ui.py and use the tkinter UI (or press C with the image window focused) to enter crop mode.  Click and drag a rectangle around the characters to read.  Ensure that the characters take up nearly all of the height of the frame.
+
+TODO
+ * better decimal detection
+ * better image filtering 
+ * support negative numbers
+ * output data to STDOUT, errors to STDERR
