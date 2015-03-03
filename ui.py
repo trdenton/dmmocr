@@ -102,14 +102,9 @@ class UI (Frame):
 		self.cb = cb
 	
 
-def imProcess(im):
-	cv2.imshow("improcess",im)
-	cv2.waitKey(1)
-
 if __name__ == "__main__":
 	root = Tk()
 	app = UI(root)
-	app.registerImageCallback(imProcess)
 	app.after(1,app.loop)
 	app.mainloop()
 	root.destroy()
