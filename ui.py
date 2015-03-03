@@ -49,6 +49,7 @@ class Webcam:
 			self.cropSelected = False
 		if key == 1048675: #c
 			self.startCrop = True
+		return i
 		
 	def crop(self):
 		self.startCrop=True
@@ -61,22 +62,54 @@ class UI (Frame):
 		self.pack()
 		self.createWidgets()
 		self.cam = Webcam()
+		self.cb = None
 	def createWidgets(self):
 		self.btnQuit = Button(self,{"text":"QUIT","command":self.quit})
 		self.btnCrop = Button(self,{"text":"Crop","command":self.crop})
+		self.btnStopCrop = Button(self,{"text":"StopCrop","command":self.resetCrop})
 		self.btnQuit.pack({"side":'left'})
 		self.btnCrop.pack({"side":'left'})
+		self.btnStopCrop.pack({"side":'left'})
 
+
+	'''
+	call this to initiate cropping
+	'''
 	def crop(self):
 		self.cam.crop()
+
+
+	'''
+	call this to stop the crop
+	'''
+	def resetCrop(self):
+		self.cam.cropSelected = False
+
+	'''
+	this needs to be called at least once to start the main loop
+	'''
 	def loop(self):
-		self.cam.run()
+		img = self.cam.run()
+		if (self.cb is not None):
+			self.cb(img)
 		self.after(1,self.loop)
+
+
+	'''
+	cb takes one argument, which is the image it receives
+	'''
+	def registerImageCallback(self,cb):
+		self.cb = cb
 	
+
+def imProcess(im):
+	cv2.imshow("improcess",im)
+	cv2.waitKey(1)
 
 if __name__ == "__main__":
 	root = Tk()
 	app = UI(root)
+	app.registerImageCallback(imProcess)
 	app.after(1,app.loop)
 	app.mainloop()
 	root.destroy()
