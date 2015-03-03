@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import cv2
 from Tkinter import *
+from ocr import *
 
 #globals
 
@@ -12,7 +13,7 @@ class Webcam:
 	pCrop1 = (0,0)
 
 	def __init__(self):
-		self.cap = cv2.VideoCapture(0)
+		self.cap = cv2.VideoCapture(1)
 		cv2.namedWindow("image")
 		cv2.setMouseCallback("image",self.mouseCB,self)
 
@@ -102,9 +103,20 @@ class UI (Frame):
 		self.cb = cb
 	
 
+def checkDigit(im):
+	try:
+		img=cv2.cvtColor(im,cv2.cv.CV_BGR2GRAY)
+		print interpretDigit(img)
+	except:
+		print "couldnt find digit...."	
+
+
+
 if __name__ == "__main__":
+	cv2.namedWindow("OCR")
 	root = Tk()
 	app = UI(root)
+	app.registerImageCallback(checkDigit)
 	app.after(1,app.loop)
 	app.mainloop()
 	root.destroy()
