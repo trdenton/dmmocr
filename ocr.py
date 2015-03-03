@@ -125,14 +125,18 @@ def interpretDigit(img):
 '''
 go through and find digits.  Assume that the image contains only the digits of interest and a reasonable margin.
 '''
-def findDigits(img):
-	h,w = img.shape
-	blur = cv2.GaussianBlur(img,(5,5),0)
-	r,im = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+def findDigits(imgIn):
+	h,w = imgIn.shape
+	blur = cv2.GaussianBlur(imgIn,(3,3),0)
+	r,imblur = cv2.threshold(imgIn,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+
+	kern = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
+	im=cv2.morphologyEx(imblur,cv2.MORPH_CLOSE,kern)
 	cv2.imshow("OCR",im)
 	cv2.waitKey(1)
 	#iterate through columns of pixels to define widths
 	digitColumns = []
+	digitRows = []
 	digitBounds = [None]*w
 
 	foundDigitX = False
@@ -153,15 +157,17 @@ def findDigits(img):
 
 
 	foundDecimal = False
+	index = 0
 	for d in digitColumns:
+		index += 1
 		dIm = im[0:h,d[0]:d[1]]
 		digitWidth = d[1]-d[0]
+		foundDigitY=False
+		startDigitY = None
+		endDigitY = None
 		if ( d[1]-d[0] < 0.25*h):
 			#this is a one or a decimal point
 			#iterate over height
-			foundDigitY=False
-			startDigitY = None
-			endDigitY = None
 			for i in xrange(h):
 				if dIm[i,0:digitWidth].any():
 					if (foundDigitY==False):
@@ -181,7 +187,9 @@ def findDigits(img):
 		else:
 			try:
 				#get actual image instead of processed for better per-digit accuracy
-				sys.stdout.write(interpretDigit(img[0:h,d[0]:d[1]]))
+				digitImg = imgIn[startDigitY:endDigitY,d[0]:d[1]]
+				cv2.imshow("digit%d"%index,digitImg)
+				sys.stdout.write(interpretDigit(digitImg))#imgIn[startDigitY:endDigitY,d[0]:d[1]]))
 			except:
 				sys.stdout.write('?')
 		#cv2.imshow("DIGIT",dIm)
