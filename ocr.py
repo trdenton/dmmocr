@@ -151,6 +151,8 @@ def findDigits(img):
 
 	#iterate through found digits
 
+
+	foundDecimal = False
 	for d in digitColumns:
 		dIm = im[0:h,d[0]:d[1]]
 		digitWidth = d[1]-d[0]
@@ -173,8 +175,9 @@ def findDigits(img):
 					foundDigitY=False
 			if (endDigitY - startDigitY) > 2*digitWidth:
 				sys.stdout.write('1')
-			else:
+			elif foundDecimal==False:
 				sys.stdout.write('.')
+				foundDecimal=True
 		else:
 			try:
 				sys.stdout.write(interpretDigit(dIm))
