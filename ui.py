@@ -106,7 +106,7 @@ class UI (Frame):
 def checkDigit(im):
 	try:
 		img=cv2.cvtColor(im,cv2.cv.CV_BGR2GRAY)
-		print interpretDigit(img)
+		findDigits(img)
 	except:
 		print "couldnt find digit...."	
 

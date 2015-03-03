@@ -1,19 +1,20 @@
 #!/usr/bin/python
 import cv2
 import numpy as np
+import sys
 
 
 '''
 should be an image of mostly just the digit with little margins, grayscale
 '''
-def interpretDigit(img):
-	h,w = img.shape
+def interpretDigit(im):
+	h,w = im.shape
 
-	blur = cv2.GaussianBlur(img,(5,5),0)
-	r,im = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+	#blur = cv2.GaussianBlur(img,(5,5),0)
+	#r,im = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
 
-	cv2.imshow("OCR",im)
-	cv2.waitKey(1)	
+	#cv2.imshow("OCR",im)
+	#cv2.waitKey(1)	
 
 	#get hist so we can auto-partition image
 #	hist = cv2.calcHist([im],[0],None,[256],[0,256])
@@ -121,20 +122,88 @@ def interpretDigit(img):
 	return resultMap[result]
 	
 	
-	
+'''
+go through and find digits.  Assume that the image contains only the digits of interest and a reasonable margin.
+'''
+def findDigits(img):
+	h,w = img.shape
+	blur = cv2.GaussianBlur(img,(5,5),0)
+	r,im = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+	cv2.imshow("OCR",im)
+	cv2.waitKey(1)
+	#iterate through columns of pixels to define widths
+	digitColumns = []
+	digitBounds = [None]*w
 
-if __name__ == '__main__':
-	#assume image is cropped already	
-	test()
+	foundDigitX = False
+	startDigitX = None
+	endDigitX = None
+	for i in xrange(w):
+		if im[:,i].any():
+			if(foundDigitX==False):
+				startDigitX=i
+			foundDigitX=True		
+		else:
+			if (foundDigitX==True):
+				endDigitX=i
+				digitColumns.append((startDigitX,endDigitX))
+			foundDigitX=False
 
+	#iterate through found digits
 
-def test():
+	for d in digitColumns:
+		dIm = im[0:h,d[0]:d[1]]
+		digitWidth = d[1]-d[0]
+		if ( d[1]-d[0] < 0.25*h):
+			#this is a one or a decimal point
+			#iterate over height
+			foundDigitY=False
+			startDigitY = None
+			endDigitY = None
+			for i in xrange(h):
+				if dIm[i,0:digitWidth].any():
+					if (foundDigitY==False):
+						#print "DING"
+						startDigitY = i
+					foundDigitY = True
+				else:
+					if (foundDigitY==True):
+						endDigitY=i
+						#print "DONG"
+					foundDigitY=False
+			if (endDigitY - startDigitY) > 2*digitWidth:
+				sys.stdout.write('1')
+			else:
+				sys.stdout.write('.')
+		else:
+			try:
+				sys.stdout.write(interpretDigit(dIm))
+			except:
+				sys.stdout.write('?')
+		#cv2.imshow("DIGIT",dIm)
+		#cv2.waitKey(0)
+	sys.stdout.write('\n')
+		
+def testOCR():
 	for i in xrange(10):
 		try: 
 			im = cv2.imread("/home/trdenton/Pictures/%d.jpg"%i,0)
 			print interpretDigit(im)
 		except:
 			print "%d sucks!" % i
+
+
+def testFind():
+	im = cv2.imread("/home/trdenton/Pictures/dmm.jpg",0)
+	findDigits(im)
+	print "\n"
+
+if __name__ == '__main__':
+	#assume image is cropped already	
+	testFind()
+	#testOCR()
+
+
 #	try:
 #		while True:
 #			cv2.imshow('test',im)
