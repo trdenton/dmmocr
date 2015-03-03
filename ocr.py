@@ -7,11 +7,11 @@ import sys
 '''
 should be an image of mostly just the digit with little margins, grayscale
 '''
-def interpretDigit(im):
-	h,w = im.shape
+def interpretDigit(img):
+	h,w = img.shape
 
-	#blur = cv2.GaussianBlur(img,(5,5),0)
-	#r,im = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+	blur = cv2.GaussianBlur(img,(5,5),0)
+	r,im = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
 
 	#cv2.imshow("OCR",im)
 	#cv2.waitKey(1)	
@@ -180,7 +180,8 @@ def findDigits(img):
 				foundDecimal=True
 		else:
 			try:
-				sys.stdout.write(interpretDigit(dIm))
+				#get actual image instead of processed for better per-digit accuracy
+				sys.stdout.write(interpretDigit(img[0:h,d[0]:d[1]]))
 			except:
 				sys.stdout.write('?')
 		#cv2.imshow("DIGIT",dIm)
